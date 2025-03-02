@@ -1,0 +1,11 @@
+[package]
+name = "monkey-rs"
+version = "0.1.0"
+authors = ["Carl RIZK <carlrizk88@gmail.com>"]
+edition = "2024"
+description = "An interpreter for the Monkey programming language."
+readme = "README.MD"
+repository = "https://github.com/carlrizk/monkey-rs"
+license = "MIT"
+
+[dependencies]
