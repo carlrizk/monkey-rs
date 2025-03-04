@@ -5,3 +5,10 @@ This repository is dedicated to building an interpreter for the [Monkey programm
 ## Overview
 
 This project is inspired and follows the book [Writing An Interpreter In Go](https://interpreterbook.com/) by [Thorsten Ball](https://thorstenball.com/), but the implementation is done using Rust.
+
+## Challenges
+
+To complicate the exercise, I imposed on myself certain technical constraints:
+
+- No libraries are allowed.
+- No Regex is allowed.
