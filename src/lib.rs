@@ -1,5 +1,6 @@
 use std::num::ParseFloatError;
 
+#[derive(Debug)]
 pub struct Token {
     token_type: TokenType,
     start: usize,
@@ -227,6 +228,35 @@ impl Iterator for Lexer {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn parses_empty_code() {
+        let lexer = Lexer::new("");
+        let tokens: Vec<Token> = lexer.into_iter().map(|token| token.unwrap()).collect();
+        assert_eq!(tokens.len(), 0)
+    }
+
+    #[test]
+    fn parses_whitespaces() {
+        let lexer = Lexer::new("");
+        let tokens: Vec<Token> = lexer.into_iter().map(|token| token.unwrap()).collect();
+        assert_eq!(tokens.len(), 0)
+    }
+
+    #[test]
+    fn returns_error_if_parsing_fails() {
+        let lexer = Lexer::new("123..456");
+        let tokens: Result<Vec<Token>, ParsingError> = lexer.into_iter().collect();
+        assert!(tokens.is_err());
+
+        let lexer = Lexer::new("123.");
+        let tokens: Result<Vec<Token>, ParsingError> = lexer.into_iter().collect();
+        assert!(tokens.is_err());
+
+        let lexer = Lexer::new("`");
+        let tokens: Result<Vec<Token>, ParsingError> = lexer.into_iter().collect();
+        assert!(tokens.is_err());
+    }
 
     #[test]
     fn recognises_single_character_tokens() {
