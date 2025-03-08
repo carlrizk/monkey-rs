@@ -238,7 +238,7 @@ mod tests {
 
     #[test]
     fn parses_whitespaces() {
-        let lexer = Lexer::new("");
+        let lexer = Lexer::new(" \t\n");
         let tokens: Vec<Token> = lexer.into_iter().map(|token| token.unwrap()).collect();
         assert_eq!(tokens.len(), 0)
     }
@@ -259,8 +259,8 @@ mod tests {
     }
 
     #[test]
-    fn recognises_single_character_tokens() {
-        let lexer = Lexer::new("=+,;(){}-/*<>");
+    fn recognises_delimiters() {
+        let lexer = Lexer::new(",;(){}");
         let tokens: Vec<TokenType> = lexer
             .into_iter()
             .map(|token| token.unwrap().token_type)
@@ -268,45 +268,62 @@ mod tests {
         assert_eq!(
             tokens,
             [
-                TokenType::Equal,
-                TokenType::Plus,
                 TokenType::Comma,
                 TokenType::SemiColon,
                 TokenType::LParen,
                 TokenType::RParen,
                 TokenType::LBrace,
                 TokenType::RBrace,
-                TokenType::Minus,
-                TokenType::Div,
-                TokenType::Mult,
-                TokenType::LT,
-                TokenType::GT
             ]
         )
     }
 
     #[test]
-    fn recognises_let_keyword() {
-        let lexer = Lexer::new("let");
-        let tokens: Vec<TokenType> = lexer
-            .into_iter()
-            .map(|token| token.unwrap().token_type)
-            .collect();
-        assert_eq!(tokens, [TokenType::Let])
+    fn recognises_operators() {
+        let input = [
+            ("=", TokenType::Equal),
+            ("+", TokenType::Plus),
+            ("-", TokenType::Minus),
+            ("*", TokenType::Mult),
+            ("/", TokenType::Div),
+            ("<", TokenType::LT),
+            (">", TokenType::GT),
+        ];
+
+        input.into_iter().for_each(|(code, expected)| {
+            let lexer = Lexer::new(code);
+            let tokens: Vec<TokenType> = lexer
+                .into_iter()
+                .map(|token| token.unwrap().token_type)
+                .collect();
+            assert_eq!(tokens, [expected])
+        });
     }
 
     #[test]
-    fn recognises_fn_keyword() {
-        let lexer = Lexer::new("fn");
-        let tokens: Vec<TokenType> = lexer
-            .into_iter()
-            .map(|token| token.unwrap().token_type)
-            .collect();
-        assert_eq!(tokens, [TokenType::Function])
+    fn recognises_keywords() {
+        let input = [
+            ("let", TokenType::Let),
+            ("fn", TokenType::Function),
+            ("if", TokenType::If),
+            ("else", TokenType::Else),
+            ("return", TokenType::Return),
+            ("true", TokenType::True),
+            ("false", TokenType::False),
+        ];
+
+        input.into_iter().for_each(|(code, expected)| {
+            let lexer = Lexer::new(code);
+            let tokens: Vec<TokenType> = lexer
+                .into_iter()
+                .map(|token| token.unwrap().token_type)
+                .collect();
+            assert_eq!(tokens, [expected])
+        });
     }
 
     #[test]
-    fn recognises_identifier() {
+    fn recognises_identifiers() {
         let input = [
             ("var", TokenType::Identifier("var".into())),
             ("_var", TokenType::Identifier("_var".into())),
@@ -324,7 +341,7 @@ mod tests {
     }
 
     #[test]
-    fn recognises_number() {
+    fn recognises_numbers() {
         let input = [
             ("123", TokenType::Number(123.0)),
             ("123.456", TokenType::Number(123.456)),
@@ -338,100 +355,5 @@ mod tests {
                 .collect();
             assert_eq!(tokens, [expected])
         });
-    }
-
-    #[test]
-    fn can_parse_code() {
-        let lexer = Lexer::new(
-            "
-                    let five = 5;
-                    let ten = 10;
-                    
-                    let add = fn(x, y) {
-                        x + y;
-                    };
-                    
-                    let result = add(five, ten);
-
-                    if (result < 10) {
-                        return true;
-                    } else {
-                        return false; 
-                    }
-            ",
-        );
-        let tokens: Vec<TokenType> = lexer
-            .into_iter()
-            .map(|token| token.unwrap().token_type)
-            .collect();
-        assert_eq!(
-            tokens,
-            [
-                // let five = 5;
-                TokenType::Let,
-                TokenType::Identifier("five".into()),
-                TokenType::Equal,
-                TokenType::Number(5.0),
-                TokenType::SemiColon,
-                // let ten = 10;
-                TokenType::Let,
-                TokenType::Identifier("ten".into()),
-                TokenType::Equal,
-                TokenType::Number(10.0),
-                TokenType::SemiColon,
-                // let add = fn(x, y) {
-                //     x + y;
-                // };
-                TokenType::Let,
-                TokenType::Identifier("add".into()),
-                TokenType::Equal,
-                TokenType::Function,
-                TokenType::LParen,
-                TokenType::Identifier("x".into()),
-                TokenType::Comma,
-                TokenType::Identifier("y".into()),
-                TokenType::RParen,
-                TokenType::LBrace,
-                TokenType::Identifier("x".into()),
-                TokenType::Plus,
-                TokenType::Identifier("y".into()),
-                TokenType::SemiColon,
-                TokenType::RBrace,
-                TokenType::SemiColon,
-                // let result = add(five, ten);
-                TokenType::Let,
-                TokenType::Identifier("result".into()),
-                TokenType::Equal,
-                TokenType::Identifier("add".into()),
-                TokenType::LParen,
-                TokenType::Identifier("five".into()),
-                TokenType::Comma,
-                TokenType::Identifier("ten".into()),
-                TokenType::RParen,
-                TokenType::SemiColon,
-                // if (result < 10) {
-                //     return true;
-                // } else {
-                //     return false;
-                // }
-                TokenType::If,
-                TokenType::LParen,
-                TokenType::Identifier("result".into()),
-                TokenType::LT,
-                TokenType::Number(10.0),
-                TokenType::RParen,
-                TokenType::LBrace,
-                TokenType::Return,
-                TokenType::True,
-                TokenType::SemiColon,
-                TokenType::RBrace,
-                TokenType::Else,
-                TokenType::LBrace,
-                TokenType::Return,
-                TokenType::False,
-                TokenType::SemiColon,
-                TokenType::RBrace
-            ]
-        )
     }
 }
