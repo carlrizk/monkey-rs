@@ -24,6 +24,8 @@ pub enum TokenType {
      * - Cannot have 2 consecutive dots
      */
     Number(f64),
+    True,
+    False,
 
     // Operators
     Equal, // =
@@ -45,6 +47,9 @@ pub enum TokenType {
     // Reserved keywords
     Let,      // let
     Function, // fn
+    If,       // if
+    Else,     // else
+    Return,   // return
 }
 
 #[derive(PartialEq, Debug)]
@@ -99,6 +104,11 @@ impl Lexer {
             let token_type = match identifier.as_str() {
                 "let" => TokenType::Let,
                 "fn" => TokenType::Function,
+                "if" => TokenType::If,
+                "else" => TokenType::Else,
+                "return" => TokenType::Return,
+                "true" => TokenType::True,
+                "false" => TokenType::False,
                 _ => TokenType::Identifier(identifier.clone()),
             };
 
@@ -301,7 +311,7 @@ mod tests {
     }
 
     #[test]
-    fn recognises_basic_instruction_set() {
+    fn can_parse_code() {
         let lexer = Lexer::new(
             "
                     let five = 5;
@@ -312,6 +322,12 @@ mod tests {
                     };
                     
                     let result = add(five, ten);
+
+                    if (result < 10) {
+                        return true;
+                    } else {
+                        return false; 
+                    }
             ",
         );
         let tokens: Vec<TokenType> = lexer
@@ -363,6 +379,28 @@ mod tests {
                 TokenType::Identifier("ten".into()),
                 TokenType::RParen,
                 TokenType::SemiColon,
+                // if (result < 10) {
+                //     return true;
+                // } else {
+                //     return false;
+                // }
+                TokenType::If,
+                TokenType::LParen,
+                TokenType::Identifier("result".into()),
+                TokenType::LT,
+                TokenType::Number(10.0),
+                TokenType::RParen,
+                TokenType::LBrace,
+                TokenType::Return,
+                TokenType::True,
+                TokenType::SemiColon,
+                TokenType::RBrace,
+                TokenType::Else,
+                TokenType::LBrace,
+                TokenType::Return,
+                TokenType::False,
+                TokenType::SemiColon,
+                TokenType::RBrace
             ]
         )
     }
