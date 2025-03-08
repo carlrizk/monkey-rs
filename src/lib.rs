@@ -28,6 +28,11 @@ pub enum TokenType {
     // Operators
     Equal, // =
     Plus,  // +
+    Minus, // -
+    Mult,  // *
+    Div,   // /
+    LT,    // <
+    GT,    // >
 
     // Delimiters
     Comma,     // ,
@@ -73,6 +78,11 @@ impl Lexer {
                 ')' => TokenType::RParen,
                 '{' => TokenType::LBrace,
                 '}' => TokenType::RBrace,
+                '-' => TokenType::Minus,
+                '/' => TokenType::Div,
+                '*' => TokenType::Mult,
+                '<' => TokenType::LT,
+                '>' => TokenType::GT,
                 _ => return None,
             };
 
@@ -210,7 +220,7 @@ mod tests {
 
     #[test]
     fn recognises_single_character_tokens() {
-        let lexer = Lexer::new("=+,;(){}");
+        let lexer = Lexer::new("=+,;(){}-/*<>");
         let tokens: Vec<TokenType> = lexer
             .into_iter()
             .map(|token| token.unwrap().token_type)
@@ -225,7 +235,12 @@ mod tests {
                 TokenType::LParen,
                 TokenType::RParen,
                 TokenType::LBrace,
-                TokenType::RBrace
+                TokenType::RBrace,
+                TokenType::Minus,
+                TokenType::Div,
+                TokenType::Mult,
+                TokenType::LT,
+                TokenType::GT
             ]
         )
     }
